@@ -5,6 +5,9 @@ import com.katllv.scorekeeper_be.security.JwtService;
 import com.katllv.scorekeeper_be.security.RefreshToken;
 import com.katllv.scorekeeper_be.security.RefreshTokenService;
 
+import com.katllv.scorekeeper_be.exception.InvalidCredentialsException;
+import com.katllv.scorekeeper_be.exception.UsernameAlreadyExistsException;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -21,7 +24,7 @@ public class UserService {
 
     public User register(String username, String rawPassword, String displayName) {
         if (userRepository.findByUsername(username).isPresent()) {
-            throw new IllegalArgumentException("Username already exists");
+            throw new UsernameAlreadyExistsException("Username already exists");
         }
 
         String hashedPassword = passwordEncoder.encode(rawPassword);
@@ -36,15 +39,33 @@ public class UserService {
 
     public AuthResponse login(String username, String rawPassword) {
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid username or password"));
+                .orElseThrow(() -> new InvalidCredentialsException("Invalid username or password"));
 
         if (!passwordEncoder.matches(rawPassword, user.getPasswordHash())) {
-            throw new IllegalArgumentException("Invalid username or password");
+            throw new InvalidCredentialsException("Invalid username or password");
         }
 
         String accessToken = jwtService.generateAccessToken(user);
         RefreshToken refreshToken = refreshTokenService.generateRefreshToken(user);
 
         return new AuthResponse(accessToken, refreshToken.getToken());
+    }
+
+    public void logout(String refreshTokenValue) {
+        RefreshToken refreshToken = refreshTokenService.validateRefreshToken(refreshTokenValue);
+        refreshTokenService.deleteToken(refreshToken);
+    }
+
+    public AuthResponse refresh(String refreshToken) {
+        RefreshToken validRefreshToken = refreshTokenService.validateRefreshToken(refreshToken);
+        User user = validRefreshToken.getUser();
+
+        String newAccessToken = jwtService.generateAccessToken(user);
+        RefreshToken newRefreshToken = refreshTokenService.generateRefreshToken(user);
+
+        // delete the old refresh token
+        refreshTokenService.deleteToken(validRefreshToken);
+
+        return new AuthResponse(newAccessToken, newRefreshToken.getToken());
     }
 }

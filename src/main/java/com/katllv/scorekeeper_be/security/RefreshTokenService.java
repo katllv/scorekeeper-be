@@ -1,5 +1,6 @@
 package com.katllv.scorekeeper_be.security;
 
+import com.katllv.scorekeeper_be.exception.InvalidRefreshTokenException;
 import com.katllv.scorekeeper_be.user.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -27,16 +28,20 @@ public class RefreshTokenService {
 
     public RefreshToken validateRefreshToken(String token) {
         RefreshToken refreshToken = refreshTokenRepository.findByToken(token)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid refresh token"));
+                .orElseThrow(() -> new InvalidRefreshTokenException("Invalid refresh token"));
 
         if (refreshToken.getExpiresAt().isBefore(Instant.now())) {
             //delete expired token from database
             refreshTokenRepository.delete(refreshToken);
             //throw exception for expired token
-            throw new IllegalArgumentException("Refresh token expired");
+            throw new InvalidRefreshTokenException("Refresh token expired");
+        }
+
+        return refreshToken;
     }
 
-    return refreshToken;
-}
+    public void deleteToken(RefreshToken refreshToken) {
+        refreshTokenRepository.delete(refreshToken);
+    }
 
 }
