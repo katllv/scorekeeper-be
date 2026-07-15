@@ -9,6 +9,7 @@ import com.katllv.scorekeeper_be.user.User;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.interfaces.DecodedJWT;
 
 @Service
 public class JwtService {
@@ -29,11 +30,11 @@ public class JwtService {
         return token;
     }
 
-    // public void validateAccessToken(String token) {
-    //     Algorithm algorithm = Algorithm.HMAC256(secret);
-    //     JWT.require(algorithm)
-    //             .build()
-    //             .verify(token)
-    //             .getSubject();
-    // }
+    public DecodedJWT validateAccessToken(String token) {
+        Algorithm algorithm = Algorithm.HMAC256(secret);
+        return JWT.require(algorithm)
+                .build()
+                .verify(token);
+    }
+
 }
