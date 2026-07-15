@@ -1,4 +1,5 @@
 package com.katllv.scorekeeper_be.user;
+import com.katllv.scorekeeper_be.user.dto.AuthResponse;
 
 import com.katllv.scorekeeper_be.security.JwtService;
 import com.katllv.scorekeeper_be.security.RefreshToken;
@@ -8,8 +9,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+// responsible for user-related operations, such as registration and login
 @Service
-@RequiredArgsConstructor
+@RequiredArgsConstructor // generates a constructor with required arguments for all final fields, allowing for dependency injection of the services and repository
 public class UserService {
 
     private final JwtService jwtService;
