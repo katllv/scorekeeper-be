@@ -15,14 +15,14 @@ import lombok.Setter;
 import lombok.NoArgsConstructor;
 
 
-@Getter
-@Setter
-@NoArgsConstructor
-@Entity
-@Table(name = "users")
+@Getter // generates get methods for all fields
+@Setter // generates set methods for all fields
+@NoArgsConstructor // generates a no-argument constructor, eg public User() {}
+@Entity // marks this class as a JPA entity, meaning it will be mapped to a database table
+@Table(name = "users") // specifies the name of the database table to which this entity will be mapped
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedValue(strategy = GenerationType.UUID) // specifies that the id field is the primary key and its value will be generated automatically using UUID strategy
     private UUID id;
 
     @Column(name = "username", nullable = false, unique = true)
